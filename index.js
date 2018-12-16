@@ -1,10 +1,13 @@
 //Board
 var blue = "#0095DD";
+var canvas = window.document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
 
 
 var Game = function (canvas, ctx) {
     this.paddle = new Paddle(canvas.width, canvas.height, ctx);
     this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, ctx);
+    this.bricks = new Bricks();
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -13,6 +16,7 @@ var Game = function (canvas, ctx) {
         clearCanvas();
         this.paddle.draw();
         this.ball.draw(this.paddle.x);
+        this.bricks.draw();
     }
     this.start = function () {
         setInterval(this.draw.bind(this), 15);
@@ -113,8 +117,39 @@ function Paddle(board_width, board_height, ctx) {
             this.x += dx;
     }
 }
+// Brick
+var Bricks = function () {
+    var brickRowCount = 3;
+    var brickColumnCount = 5;
+    var brickWidth = 75;
+    var brickHeight = 20;
+    var brickPadding = 10;
+    var brickOffsetTop = 30;
+    var brickOffsetLeft = 30;
 
-var canvas = window.document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
+    var bricks = [];
+    for (var c = 0; c < brickColumnCount; c++) {
+        bricks[c] = [];
+        for (var r = 0; r < brickRowCount; r++) {
+            bricks[c][r] = { x: 0, y: 0 };
+        }
+    }
+
+    this.draw = function() {
+        for (var c = 0; c < brickColumnCount; c++) {
+            for (var r = 0; r < brickRowCount; r++) {
+                bricks[c][r] = { x: (c * (brickWidth + brickPadding)) + brickOffsetLeft, y: (r * (brickHeight + brickPadding)) + brickOffsetTop };
+                ctx.beginPath();
+                ctx.rect(bricks[c][r].x, bricks[c][r].y, brickWidth, brickHeight);
+                ctx.fillStyle = "#0095DD";
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+
+}
+
+
 var game = new Game(canvas, ctx)
 game.start();
