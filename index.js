@@ -7,13 +7,12 @@ function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function draw() {
+draw = function () {
     clearCanvas();
-    drawPaddle();
+    paddle.draw();
     drawBall();
     updateBallPosition();
     adjustBallDirection();
-    updatePaddlePosition();
 }
 
 
@@ -44,7 +43,7 @@ function adjustBallDirection() {
     if (y + dy < 0) {
         dy = -dy;
     } if (y + dy > canvas.height - ballRadius) {
-        if (x > paddleX && x < paddleX + paddleWidth) {
+        if (x > paddle.x && x < paddle.x + paddle.width) {
             dy = -dy;
         }
         else {
@@ -55,52 +54,59 @@ function adjustBallDirection() {
 }
 
 // Paddle
-var paddleHeight = 10;
-var paddleWidth = 75;
-var paddleX = (canvas.width - paddleWidth) / 2;
-var rightPressed = false;
-var leftPressed = false;
 
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
+function Paddle(board_width, board_height) {
+    this.width = 75;
+    this.height = 10;
+    this.x = (board_width - this.width) / 2;
+    var rightPressed = false;
+    var leftPressed = false;
 
-function keyUpHandler(e) {
-    if (e.keyCode == 39) {
-        rightPressed = false;
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+
+    function keyUpHandler(e) {
+        if (e.keyCode == 39) {
+            rightPressed = false;
+        }
+        else if (e.keyCode == 37) {
+            leftPressed = false;
+        }
     }
-    else if (e.keyCode == 37) {
-        leftPressed = false;
+
+    function keyDownHandler(e) {
+        if (e.keyCode == 39) {
+            rightPressed = true;
+        }
+        else if (e.keyCode == 37) {
+            leftPressed = true;
+        }
+
+    }
+
+    this.draw = function () {
+        ctx.beginPath();
+        ctx.rect(this.x, board_height - this.height, this.width, this.height);
+        ctx.fillStyle = blue;
+        ctx.fill();
+        ctx.closePath();
+        this.updatePaddlePosition();
+
+    }
+
+    this.updatePaddlePosition = function () {
+        var dx = 7;
+        if (leftPressed && this.x >= 0)
+            this.x -= dx;
+        if (rightPressed && this.x <= (board_width - this.width))
+            this.x += dx;
     }
 }
 
-function keyDownHandler(e) {
-    if (e.keyCode == 39) {
-        rightPressed = true;
-    }
-    else if (e.keyCode == 37) {
-        leftPressed = true;
-    }
-
-}
-
-function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = blue;
-    ctx.fill();
-    ctx.closePath();
-}
-
-function updatePaddlePosition() {
-    var dx = 7;
-    if (leftPressed && paddleX >= 0)
-        paddleX -= dx;
-    if (rightPressed && paddleX <= (canvas.width - paddleWidth))
-        paddleX += dx;
-}
 
 
 
 
 // Main
+var paddle = new Paddle(canvas.width, canvas.height);
 setInterval(draw, 15);
