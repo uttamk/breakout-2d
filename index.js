@@ -22,9 +22,10 @@ var Game = function (canvas, ctx) {
         this.bricks.draw();
         this.scoreBoard.draw();
         this.lives.draw();
+        requestAnimationFrame(this.draw.bind(this));
     }
     this.start = function () {
-        setInterval(this.draw.bind(this), 15);
+        this.draw();
     }
 }
 
