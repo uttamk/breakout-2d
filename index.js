@@ -4,16 +4,15 @@ var blue = "#0095DD";
 
 var Game = function (canvas, ctx) {
     this.paddle = new Paddle(canvas.width, canvas.height, ctx);
-    this.ball = new Ball(canvas.width, canvas.height, this.paddle, ctx);
+    this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, ctx);
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-
     this.draw = function () {
         clearCanvas();
         this.paddle.draw();
-        this.ball.draw();
+        this.ball.draw(this.paddle.x);
     }
     this.start = function () {
         setInterval(this.draw.bind(this), 15);
@@ -23,21 +22,21 @@ var Game = function (canvas, ctx) {
 
 // Ball
 
-var Ball = function (board_width, board_height, paddle, ctx) {
+var Ball = function (board_width, board_height, paddleWidth, ctx) {
     var x = board_width / 2;
     var y = board_height - 30;
     var ballRadius = 10;
     var dx = 2;
     var dy = -2;
 
-    this.draw = function () {
+    this.draw = function (paddleX) {
         ctx.beginPath();
         ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
         ctx.fillStyle = blue;
         ctx.fill();
         ctx.closePath();
         updateBallPosition();
-        adjustBallDirection();
+        adjustBallDirection(paddleX);
     }
 
     function updateBallPosition() {
@@ -45,14 +44,15 @@ var Ball = function (board_width, board_height, paddle, ctx) {
         y += dy;
     }
 
-    function adjustBallDirection() {
+    function adjustBallDirection(paddleX) {
         if (x + dx < 0 || x + dx > board_width - ballRadius) {
             dx = -dx;
         }
         if (y + dy < 0) {
             dy = -dy;
-        } if (y + dy > board_height - ballRadius) {
-            if (x > paddle.x && x < paddle.x + paddle.width) {
+        }
+        if (y + dy > board_height - ballRadius) {
+            if (x > paddleX && x < paddleX + paddleWidth) {
                 dy = -dy;
             }
             else {
