@@ -8,7 +8,9 @@ var Game = function (canvas, ctx) {
     this.paddle = new Paddle(canvas.width, canvas.height, canvas.offsetLeft, ctx);
     this.bricks = new Bricks(ctx);
     this.scoreBoard = new ScoreBoard(15, ctx)
-    this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, this.bricks.detectCollisions, this.scoreBoard.increment.bind(this.scoreBoard), ctx);
+    this.lives = new Lives(3, ctx);
+    this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, this.bricks.detectCollisions,
+        this.scoreBoard.increment.bind(this.scoreBoard), this.lives.loseLife.bind(this.lives), ctx);
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -19,6 +21,7 @@ var Game = function (canvas, ctx) {
         this.ball.draw(this.paddle.x);
         this.bricks.draw();
         this.scoreBoard.draw();
+        this.lives.draw();
     }
     this.start = function () {
         setInterval(this.draw.bind(this), 15);
@@ -28,7 +31,7 @@ var Game = function (canvas, ctx) {
 
 // Ball
 
-var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisions, incrementScore, ctx) {
+var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisions, incrementScore, loseLife, ctx) {
     this.x = board_width / 2;
     this.y = board_height - 30;
     var ballRadius = 10;
@@ -66,8 +69,8 @@ var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisio
                 dy = -dy;
             }
             else {
-                alert("GAME OVER");
-                document.location.reload();
+                loseLife();
+                dy = -dy;
             }
         }
     }
@@ -207,6 +210,26 @@ var ScoreBoard = function (maxScore, ctx) {
             alert('You win !!!');
             document.location.reload();
         }
+    }
+}
+
+//Lives
+var Lives = function (noOfLives, ctx) {
+    this.noOfLives = noOfLives;
+
+    this.loseLife = function () {
+        this.noOfLives -= 1;
+        if (this.noOfLives === 0) {
+            alert("GAME OVER");
+            document.location.reload();
+        }
+    }
+    this.draw = function () {
+        ctx.beginPath();
+        ctx.font = "16px Arial";
+        ctx.fillStyle = blue;
+        ctx.fillText("Lives: " + this.noOfLives, 75, 20);
+        ctx.closePath();
     }
 }
 
