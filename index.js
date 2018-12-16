@@ -1,22 +1,29 @@
 //Board
-var canvas = window.document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
 var blue = "#0095DD";
 
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
 
-draw = function () {
-    clearCanvas();
-    paddle.draw();
-    ball.draw();
+var Game = function (canvas, ctx) {
+    this.paddle = new Paddle(canvas.width, canvas.height, ctx);
+    this.ball = new Ball(canvas.width, canvas.height, this.paddle, ctx);
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    this.draw = function () {
+        clearCanvas();
+        this.paddle.draw();
+        this.ball.draw();
+    }
+    this.start = function () {
+        setInterval(this.draw.bind(this), 15);
+    }
 }
 
 
 // Ball
 
-var Ball = function (board_width, board_height, paddle) {
+var Ball = function (board_width, board_height, paddle, ctx) {
     var x = board_width / 2;
     var y = board_height - 30;
     var ballRadius = 10;
@@ -59,7 +66,7 @@ var Ball = function (board_width, board_height, paddle) {
 
 // Paddle
 
-function Paddle(board_width, board_height) {
+function Paddle(board_width, board_height, ctx) {
     this.width = 75;
     this.height = 10;
     this.x = (board_width - this.width) / 2;
@@ -107,8 +114,7 @@ function Paddle(board_width, board_height) {
     }
 }
 
-
-// Main
-var paddle = new Paddle(canvas.width, canvas.height);
-var ball = new Ball(canvas.width, canvas.height, paddle);
-setInterval(draw, 15);
+var canvas = window.document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var game = new Game(canvas, ctx)
+game.start();
