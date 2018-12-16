@@ -6,8 +6,8 @@ var ctx = canvas.getContext("2d");
 
 var Game = function (canvas, ctx) {
     this.paddle = new Paddle(canvas.width, canvas.height, ctx);
-    this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, ctx);
     this.bricks = new Bricks();
+    this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, this.bricks.detectCollisions, ctx);
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -26,37 +26,40 @@ var Game = function (canvas, ctx) {
 
 // Ball
 
-var Ball = function (board_width, board_height, paddleWidth, ctx) {
-    var x = board_width / 2;
-    var y = board_height - 30;
+var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisions, ctx) {
+    this.x = board_width / 2;
+    this.y = board_height - 30;
     var ballRadius = 10;
     var dx = 2;
     var dy = -2;
 
     this.draw = function (paddleX) {
         ctx.beginPath();
-        ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
+        ctx.arc(this.x, this.y, ballRadius, 0, 2 * Math.PI);
         ctx.fillStyle = blue;
         ctx.fill();
         ctx.closePath();
-        updateBallPosition();
-        adjustBallDirection(paddleX);
+        this.adjustBallDirection(paddleX);
+        this.updateBallPosition();
     }
 
-    function updateBallPosition() {
-        x += dx;
-        y += dy;
+    this.updateBallPosition = function () {
+        this.x += dx;
+        this.y += dy;
     }
 
-    function adjustBallDirection(paddleX) {
-        if (x + dx < 0 || x + dx > board_width - ballRadius) {
-            dx = -dx;
-        }
-        if (y + dy < 0) {
+    this.adjustBallDirection = function (paddleX) {
+        if (detectBrickCollisions(this.x, this.y)) {
             dy = -dy;
         }
-        if (y + dy > board_height - ballRadius) {
-            if (x > paddleX && x < paddleX + paddleWidth) {
+        if (this.x + dx < 0 || this.x + dx > board_width - ballRadius) {
+            dx = -dx;
+        }
+        if (this.y + dy < 0) {
+            dy = -dy;
+        }
+        if (this.y + dy > board_height - ballRadius) {
+            if (this.x > paddleX && this.x < paddleX + paddleWidth) {
                 dy = -dy;
             }
             else {
@@ -131,19 +134,44 @@ var Bricks = function () {
     for (var c = 0; c < brickColumnCount; c++) {
         bricks[c] = [];
         for (var r = 0; r < brickRowCount; r++) {
-            bricks[c][r] = { x: 0, y: 0 };
+            bricks[c][r] = {
+                x: (c * (brickWidth + brickPadding)) + brickOffsetLeft,
+                y: (r * (brickHeight + brickPadding)) + brickOffsetTop,
+                active: true
+            };
         }
     }
+    function hasCollided(brick, ballX, ballY) {
+        if (ballX >= brick.x && ballX < brick.x + brickWidth && ballY >= brick.y && ballY < brick.y + brickHeight) {
+            return true;
+        }
+        return false;
+    }
 
-    this.draw = function() {
+    this.detectCollisions = function (ballX, ballY) {
         for (var c = 0; c < brickColumnCount; c++) {
             for (var r = 0; r < brickRowCount; r++) {
-                bricks[c][r] = { x: (c * (brickWidth + brickPadding)) + brickOffsetLeft, y: (r * (brickHeight + brickPadding)) + brickOffsetTop };
-                ctx.beginPath();
-                ctx.rect(bricks[c][r].x, bricks[c][r].y, brickWidth, brickHeight);
-                ctx.fillStyle = "#0095DD";
-                ctx.fill();
-                ctx.closePath();
+                var brick = bricks[c][r];
+                if (brick.active && hasCollided(brick, ballX, ballY)) {
+                    brick.active = false;
+                    return true
+                }
+            }
+        }
+        return false;
+    }
+
+    this.draw = function () {
+        for (var c = 0; c < brickColumnCount; c++) {
+            for (var r = 0; r < brickRowCount; r++) {
+                var brick = bricks[c][r];
+                if (brick.active) {
+                    ctx.beginPath();
+                    ctx.rect(brick.x, brick.y, brickWidth, brickHeight);
+                    ctx.fillStyle = blue;
+                    ctx.fill();
+                    ctx.closePath();
+                }
             }
         }
     }
