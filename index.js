@@ -1,13 +1,14 @@
 //Board
 var blue = "#0095DD";
 var canvas = window.document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
 
 
 var Game = function (canvas, ctx) {
+    var ctx = canvas.getContext("2d");
     this.paddle = new Paddle(canvas.width, canvas.height, ctx);
-    this.bricks = new Bricks();
-    this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, this.bricks.detectCollisions, ctx);
+    this.bricks = new Bricks(ctx);
+    this.scoreBoard = new ScoreBoard(15, ctx)
+    this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, this.bricks.detectCollisions, this.scoreBoard.increment.bind(this.scoreBoard), ctx);
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -17,6 +18,7 @@ var Game = function (canvas, ctx) {
         this.paddle.draw();
         this.ball.draw(this.paddle.x);
         this.bricks.draw();
+        this.scoreBoard.draw();
     }
     this.start = function () {
         setInterval(this.draw.bind(this), 15);
@@ -26,7 +28,7 @@ var Game = function (canvas, ctx) {
 
 // Ball
 
-var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisions, ctx) {
+var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisions, incrementScore, ctx) {
     this.x = board_width / 2;
     this.y = board_height - 30;
     var ballRadius = 10;
@@ -51,6 +53,7 @@ var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisio
     this.adjustBallDirection = function (paddleX) {
         if (detectBrickCollisions(this.x, this.y)) {
             dy = -dy;
+            incrementScore();
         }
         if (this.x + dx < 0 || this.x + dx > board_width - ballRadius) {
             dx = -dx;
@@ -121,7 +124,7 @@ function Paddle(board_width, board_height, ctx) {
     }
 }
 // Brick
-var Bricks = function () {
+var Bricks = function (ctx) {
     var brickRowCount = 3;
     var brickColumnCount = 5;
     var brickWidth = 75;
@@ -178,6 +181,27 @@ var Bricks = function () {
 
 }
 
+//Score
+var ScoreBoard = function (maxScore, ctx) {
+    this.score = 0;
+    this.draw = function () {
+        ctx.beginPath();
+        ctx.font = "16px Arial";
+        ctx.fillStyle = blue;
+        ctx.fillText("Score: " + this.score, 8, 20);
+        ctx.closePath();
+    }
 
-var game = new Game(canvas, ctx)
+    this.increment = function () {
+        this.score += 1;
+        if (this.score === maxScore) {
+            console.log("You win");
+            alert('You win !!!');
+            document.location.reload();
+        }
+    }
+}
+
+
+var game = new Game(canvas)
 game.start();
