@@ -10,47 +10,51 @@ function clearCanvas() {
 draw = function () {
     clearCanvas();
     paddle.draw();
-    drawBall();
-    updateBallPosition();
-    adjustBallDirection();
+    ball.draw();
 }
 
 
 // Ball
-var x = canvas.width / 2;
-var y = canvas.height - 30;
-var ballRadius = 10;
-var dx = 2;
-var dy = -2;
 
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
-    ctx.fillStyle = blue;
-    ctx.fill();
-    ctx.closePath();
-}
+var Ball = function (board_width, board_height, paddle) {
+    var x = board_width / 2;
+    var y = board_height - 30;
+    var ballRadius = 10;
+    var dx = 2;
+    var dy = -2;
 
-function updateBallPosition() {
-    x += dx;
-    y += dy;
-}
-
-function adjustBallDirection() {
-    if (x + dx < 0 || x + dx > canvas.width - ballRadius) {
-        dx = -dx;
+    this.draw = function () {
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = blue;
+        ctx.fill();
+        ctx.closePath();
+        updateBallPosition();
+        adjustBallDirection();
     }
-    if (y + dy < 0) {
-        dy = -dy;
-    } if (y + dy > canvas.height - ballRadius) {
-        if (x > paddle.x && x < paddle.x + paddle.width) {
+
+    function updateBallPosition() {
+        x += dx;
+        y += dy;
+    }
+
+    function adjustBallDirection() {
+        if (x + dx < 0 || x + dx > board_width - ballRadius) {
+            dx = -dx;
+        }
+        if (y + dy < 0) {
             dy = -dy;
-        }
-        else {
-            alert("GAME OVER");
-            document.location.reload();
+        } if (y + dy > board_height - ballRadius) {
+            if (x > paddle.x && x < paddle.x + paddle.width) {
+                dy = -dy;
+            }
+            else {
+                alert("GAME OVER");
+                document.location.reload();
+            }
         }
     }
+
 }
 
 // Paddle
@@ -104,9 +108,7 @@ function Paddle(board_width, board_height) {
 }
 
 
-
-
-
 // Main
 var paddle = new Paddle(canvas.width, canvas.height);
+var ball = new Ball(canvas.width, canvas.height, paddle);
 setInterval(draw, 15);
