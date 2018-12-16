@@ -5,7 +5,7 @@ var canvas = window.document.getElementById("myCanvas");
 
 var Game = function (canvas, ctx) {
     var ctx = canvas.getContext("2d");
-    this.paddle = new Paddle(canvas.width, canvas.height, ctx);
+    this.paddle = new Paddle(canvas.width, canvas.height, canvas.offsetLeft, ctx);
     this.bricks = new Bricks(ctx);
     this.scoreBoard = new ScoreBoard(15, ctx)
     this.ball = new Ball(canvas.width, canvas.height, this.paddle.width, this.bricks.detectCollisions, this.scoreBoard.increment.bind(this.scoreBoard), ctx);
@@ -76,7 +76,7 @@ var Ball = function (board_width, board_height, paddleWidth, detectBrickCollisio
 
 // Paddle
 
-function Paddle(board_width, board_height, ctx) {
+function Paddle(board_width, board_height, board_offsetLeft, ctx) {
     this.width = 75;
     this.height = 10;
     this.x = (board_width - this.width) / 2;
@@ -104,6 +104,14 @@ function Paddle(board_width, board_height, ctx) {
         }
 
     }
+
+    this.mouseMoveHandler = function (e) {
+        var relativeX = e.clientX - board_offsetLeft;
+        if (relativeX > 0 && relativeX < board_width) {
+            this.x = relativeX - this.width / 2;
+        }
+    }
+    document.addEventListener("mousemove", this.mouseMoveHandler.bind(this), false);
 
     this.draw = function () {
         ctx.beginPath();
