@@ -229,7 +229,7 @@ var Lives = function (noOfLives, ctx) {
         ctx.beginPath();
         ctx.font = "16px Arial";
         ctx.fillStyle = blue;
-        ctx.fillText("Lives: " + this.noOfLives, 75, 20);
+        ctx.fillText("Lives: " + this.noOfLives, 415, 20);
         ctx.closePath();
     }
 }
